@@ -1,24 +1,36 @@
 import React from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
+import { AppStateProvider, useAppState } from './state/AppStateContext';
 import { Column } from './Column';
 import { AppContainer } from './styles';
 import { AddNewItem } from './AddNewItem';
-import { AppStateProvider, useAppState } from './state/AppStateContext';
+import { addList } from './state/actions';
+import { CustomDragLayer } from './CustomDragLayer';
 
 export const App: React.FC = () => {
-    const { lists } = useAppState();
+    const { lists, dispatch } = useAppState();
 
-    console.log(lists);
+    console.log('*** ', lists);
     return (
-        <AppStateProvider>
-            <AppContainer>
-                {lists.map((list) => (
-                    <Column text={list.text} key={list.id} id={list.id} />
-                ))}
-                <AddNewItem
-                    toggleButtonText='+ Add another list'
-                    onAdd={console.log}
-                />
-            </AppContainer>
-        </AppStateProvider>
+        <DndProvider backend={Backend}>
+            <AppStateProvider>
+                <AppContainer>
+                    <CustomDragLayer />
+                    {lists &&
+                        lists.map((list) => (
+                            <Column
+                                text={list.text}
+                                key={list.id}
+                                id={list.id}
+                            />
+                        ))}
+                    <AddNewItem
+                        toggleButtonText='+ Add another list'
+                        onAdd={(text) => dispatch(addList(text))}
+                    />
+                </AppContainer>
+            </AppStateProvider>
+        </DndProvider>
     );
 };
